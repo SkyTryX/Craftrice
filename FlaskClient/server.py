@@ -31,10 +31,9 @@ def format_json(cmd:str):
                     }}
 
 import asyncio, websockets, json; from uuid import uuid4; from time import sleep; from flask import Flask, render_template, request, redirect
-import threading
+
 async def mineproxy(websocket):
     global resultat
-    processed = True
     print('La connection avec Minecraft a été effectué!')
     coords_input = ["-31.5 -59 70", "-31.5 -59 72", "-31.5 -59 74", "-31.5 -59 78", "-31.5 -59 80", "-31.5 -59 82"]
 
