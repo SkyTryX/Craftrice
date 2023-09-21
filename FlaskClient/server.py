@@ -1,20 +1,4 @@
-def format_json(cmd:str):
-    return {"header": {
-                        "version": 1,
-                        "requestId": f'{uuid4()}',
-                        "messagePurpose": "commandRequest",
-                        "messageType": "commandRequest"
-                    },
-                    "body": {
-                        "version": 1,
-                        "commandLine": cmd,
-                        "origin": {
-                            "type": "player"
-                        }
-                    }}
-
-from uuid import uuid4; from flask import Flask, render_template, request, redirect
-
+from uuid import uuid4; from flask import Flask, render_template, request, redirect; from json import dump, load, decoder
 
 app = Flask(__name__)
 @app.route("/")
@@ -23,10 +7,24 @@ def index():
 
 @app.route("/waiting", methods=['POST'])
 def waiting():
-    global v1, v2, op
-    v1 = int(request.form["v1"])
-    v2 = int(request.form["v2"])
-    op = request.form["op"]
+    with open("requests.json", 'r') as file:
+        try:
+            data = load(file)
+        except decoder.JSONDecodeError:
+            data = []
+
+    data.append({"identification":{
+        "uuid": f'{uuid4()}',
+        "queue_pos": len(data)
+    },
+    "request":{
+        "v1": int(request.form["v1"]),
+        "op": request.form["op"],
+        "v2": int(request.form["v2"])
+    }})
+
+    with open("requests.json", 'w') as json_file:
+        dump(data, json_file, indent=4, sort_keys=True)
     return redirect("/results")
 
 @app.route("/results")
