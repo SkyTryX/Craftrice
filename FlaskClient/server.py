@@ -7,6 +7,7 @@ def index():
 
 @app.route("/waiting", methods=['POST'])
 def waiting():
+    uuid = uuid4()
     with open("requests.json", 'r') as file:
         try:
             data = load(file)
@@ -14,7 +15,7 @@ def waiting():
             data = []
 
     data.append({"identification":{
-        "uuid": f'{uuid4()}',
+        "uuid": f'{uuid}',
         "queue_pos": len(data)
     },
     "request":{
@@ -25,7 +26,7 @@ def waiting():
 
     with open("requests.json", 'w') as json_file:
         dump(data, json_file, indent=4, sort_keys=True)
-    return redirect("/results")
+    return render_template("waiting.html", pos= len(data), uuid = f'{uuid}')
 
 @app.route("/results")
 def results():

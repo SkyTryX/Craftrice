@@ -2,10 +2,9 @@ import asyncio, websockets, json; from time import sleep; from methods import *
 
 with open("requests.json", "r") as file:
     dict = json.loads(file.read())
-    dict["request"]["v1"]
-    v1 = dict["request"]["v1"]
-    op = dict["request"]["op"]
-    v2 = dict["request"]["v2"]
+    v1 = dict[0]["request"]["v1"]
+    op = dict[0]["request"]["op"]
+    v2 = dict[0]["request"]["v2"]
 
 async def mineproxy(websocket):
     print('La connection avec Minecraft a été effectué!')
