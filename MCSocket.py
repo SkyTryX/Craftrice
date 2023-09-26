@@ -2,9 +2,15 @@ import asyncio, websockets, json; from time import sleep; from methods import *
 
 with open("requests.json", "r") as file:
     dict = json.loads(file.read())
-    v1 = dict[0]["request"]["v1"]
-    op = dict[0]["request"]["op"]
-    v2 = dict[0]["request"]["v2"]
+v1 = dict[0]["request"]["v1"]
+op = dict[0]["request"]["op"]
+v2 = dict[0]["request"]["v2"]
+uuid = dict[0]["identification"]["uuid"]
+dict.pop(0)
+for d in dict:
+    d["identification"]["queue_pos"] -= 1
+with open("requests.json", 'w') as json_file:
+        json.dump(dict, json_file, indent=4, sort_keys=True)
 
 async def mineproxy(websocket):
     print('La connection avec Minecraft a été effectué!')
@@ -89,6 +95,12 @@ async def mineproxy(websocket):
                             output_dec -= 2**pos
                         pos-= 1
             print(output_dec, output_bin)
+            with open("res.json", 'w') as json_file:
+                json_file = {
+                    "uuid": uuid,
+                    "res": output_dec
+                }
+                json.dump(dict, json_file, indent=4, sort_keys=True)
 
     #Si Minecraft se ferme
     except websockets.exceptions.ConnectionClosedError:

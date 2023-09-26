@@ -1,4 +1,4 @@
-from uuid import uuid4; from flask import Flask, render_template, request, redirect; from json import dump, load, decoder
+from uuid import uuid4; from flask import Flask, render_template, request; from json import dump, load, decoder
 
 app = Flask(__name__)
 @app.route("/")

@@ -1,0 +1,24 @@
+body {
+    background: #202020;
+    color: paleturquoise;
+    font-size: 26px;
+    text-align: center;
+
+}
+
+a {
+    font-size: 48px;
+    color: rgb(18, 187, 187);
+}
+
+h1 {
+    font-size: 64px;
+    font-family: Arial, Helvetica, sans-serif;
+    color: rgb(202, 202, 202);
+}
+
+h2 {
+    font-size: 32px;
+    font-family: Arial, Helvetica, sans-serif;
+    color: rgb(255, 187, 0);
+}
