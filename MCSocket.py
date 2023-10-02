@@ -1,7 +1,7 @@
 import asyncio, websockets, json; from time import sleep; from methods import *
 
 with open("requests.json", "r") as file:
-    dict = json.loads(file.read())
+    dict = json.load(file)
 v1 = dict[0]["request"]["v1"]
 op = dict[0]["request"]["op"]
 v2 = dict[0]["request"]["v2"]
