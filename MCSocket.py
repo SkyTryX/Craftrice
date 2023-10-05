@@ -1,36 +1,41 @@
 import asyncio, websockets, json; from time import sleep; from methods import *
 
 with open("requests.json", "r") as file:
-    dict = json.load(file)
-v1 = dict[0]["request"]["v1"]
-op = dict[0]["request"]["op"]
-v2 = dict[0]["request"]["v2"]
-uuid = dict[0]["identification"]["uuid"]
-dict.pop(0)
-for d in dict:
-    d["identification"]["queue_pos"] -= 1
-with open("requests.json", 'w') as json_file:
-        json.dump(dict, json_file, indent=4, sort_keys=True)
+    dict:list = json.load(file)
+if(len(dict) != 0):
+    v1:int = int(dict[0]["request"]["v1"])
+    op:str = dict[0]["request"]["op"]
+    v2:int = int(dict[0]["request"]["v2"])
+    uuid:str = dict[0]["identification"]["uuid"]
+    dict.pop(0)
+    for d in dict:
+        d["identification"]["queue_pos"] -= 1
+    with open("requests.json", 'w') as json_file:
+            json.dump(dict, json_file, indent=4, sort_keys=True)
+else:
+    quit("[WEBSOCKET] Aucun appel de calcul")
 
 async def mineproxy(websocket):
-    print('La connection avec Minecraft a été effectué!')
-    coords_input = ["-31.5 -59 70", "-31.5 -59 72", "-31.5 -59 74", "-31.5 -59 78", "-31.5 -59 80", "-31.5 -59 82"]
+    print(f'[WEBSOCKET] - Calcul en cours (v1={v1}, op={op}, v2={v2}) par {uuid}')
+    coords_input:list[int] = ["-31.5 -59 70", "-31.5 -59 72", "-31.5 -59 74", "-31.5 -59 78", "-31.5 -59 80", "-31.5 -59 82"]
     try: 
         #Determine quelle valeur est négative
-        if v1 < 0: v1_neg = True 
-        else: v1_neg = False
-        if v2 < 0: v2_neg = True 
-        else: v2_neg = False
+        if v1 < 0: v1_neg:bool = True 
+        else: v1_neg:bool = False
+        if v2 < 0: v2_neg:bool = True 
+        else: v2_neg:bool = False
 
         #Traduction de décimal à binaire
-        v1_bin = dec2bin(v1, v1_neg)
-        v2_bin = dec2bin(v2, v2_neg)
+        v1_bin:list[int] = dec2bin(v1, v1_neg)
+        v2_bin:list[int] = dec2bin(v2, v2_neg)
 
         #On fait disparaitre les villageois des anciens calculs
+        print("[MINECRAFT] - Elimination des anciens villageois")
         await websocket.send(json.dumps(format_json("kill @e[type=villager]")))
 
         #Pour chaque valeur en binaire, on importe l'input sur Minecraft grâce à des spawns de villageois
-        value_check = 0
+        print("[MINECRAFT] - Apparition des villageois en fonction de la traduction binaire des nombres")
+        value_check:int = 0
         for value in v1_bin:
             if value == 1:
                 await websocket.send(json.dumps(format_json(f"summon villager {coords_input[value_check]}")))
@@ -48,6 +53,7 @@ async def mineproxy(websocket):
             await websocket.send(json.dumps(format_json("summon villager -23 -37 21")))
 
         #On regarde le calcul selectionné, pour regarder l'output que l'on veut
+        print("[MINECRAFT] - Calcul en cours...")
         if op == "x":
             sleep(20)
             for coords in ["-13 -59 81", "-12 -59 81", "-11 -59 81", "-10 -59 81", "-9 -59 81", "-8 -59 81"]:
@@ -60,9 +66,10 @@ async def mineproxy(websocket):
             await websocket.send(json.dumps(format_json(f"testforblock -8 -59 50 lit_redstone_lamp")))
 
         #On récupère les resultats en récupérant les websockets envoyés par Minecraft
-        output_dec = 0
-        pos = 0
-        output_bin = []
+        print("[WEBSOCKET] - Traduction des resultats renvoyés par Minecraft")
+        output_dec:int = 0
+        pos:int = 0
+        output_bin:list[int] = []
         async for msg in websocket:
             msg = json.loads(msg)
             if msg['body'].get('matches', None) != None:
@@ -75,7 +82,6 @@ async def mineproxy(websocket):
                     output_bin.append(0)
 
                 if msg["body"]["position"]["x"] == -8 and op == "+" or msg["body"]["position"]["x"] == -7 and op == "x" and msg['body']["matches"] == False:
-                    output_dec= 0
                     for i in range(len(output_bin)):
                         if output_bin[i]== 0: output_bin[i] = 1
                         else: output_bin[i] = 0
@@ -89,12 +95,11 @@ async def mineproxy(websocket):
 
                     output_bin[len(output_bin)-1] = 0
                     pos= len(output_bin)-1
-                    print(output_bin)
                     for bit in output_bin:
                         if bit == 1:
                             output_dec -= 2**pos
                         pos-= 1
-            print(output_dec, output_bin)
+            print(f"[WEBSOCKET] - Resultat pour {uuid}: {output_dec} (bin={output_bin})")
             with open("res.json", 'w') as json_file:
                 json_file = {
                     "uuid": uuid,
@@ -102,13 +107,11 @@ async def mineproxy(websocket):
                 }
                 json.dump(dict, json_file, indent=4, sort_keys=True)
 
-    #Si Minecraft se ferme
     except websockets.exceptions.ConnectionClosedError:
-        print("Exceptions.ConnectionClosedError || La connection avec Minecraft a été rompu par l'hote distant")
+        print("[WEBSOCKET] - La connection avec Minecraft a été rompu par l'hote distant")
 
-#Permet de lancer le websocket
 async def main():
     async with websockets.serve(mineproxy, host='localhost', port=3000):
-        print("\nC'est prêt! -> /connect localhost:3000 || Ctrl+C pour arrêter le websocket")
+        print("[WEBSOCKET] - Connection Possible (port=3000)")
         await asyncio.Future()
 asyncio.run(main())
