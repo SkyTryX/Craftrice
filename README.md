@@ -8,4 +8,4 @@ The project is divided into 3 pieces, the MCSocket that actually sends and recei
 Once it's connected, wait for it to calculate the result and once it's done, it will be in the output of the console.
 
 ## Why are we not using the Flask part ?
-Because I did not have any solution to actually make it work back when I created the project. If I ever want to finish the project completly, I should be able to use it as I have a good idea to make it work!
+Because I did not have any solution to actually make it work back when I created the project. If I ever want to finish the project completly, I should be able fix this as I have a good idea to make it work!
